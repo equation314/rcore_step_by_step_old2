@@ -14,7 +14,7 @@ panic = "abort"
 
 [dependencies]
 bbl = { path = "crate/bbl" }
-riscv = { path = "crate/riscv", features = ["inline-asm"] }
+riscv = { git = "https://github.com/rcore-os/riscv", features = ["inline-asm"] }
 buddy_system_allocator = "0.1"
 device_tree = { path = "crate/device_tree-rs" }
 bit_field = "0.9"
@@ -25,3 +25,4 @@ RoundRobinScheduler = { path  = "crate/RoundRobinScheduler" }
 xmas-elf = "0.6"
 rcore-fs = { path = "crate/rcore-fs" }
 rcore-fs-sfs = { path = "crate/rcore-fs-sfs" }
+rcore-exception = { git = "https://github.com/equation314/rcore-exception" }

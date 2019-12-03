@@ -1,16 +1,4 @@
-use riscv::register::{
-    sstatus::Sstatus,
-    scause::Scause,
-};
-
-#[repr(C)]
-pub struct TrapFrame {
-    pub x: [usize; 32], // General registers
-    pub sstatus: Sstatus, // Supervisor Status Register
-    pub sepc: usize, // Supervisor exception program counter
-    pub stval: usize, // Supervisor trap value
-    pub scause: Scause, // Scause register: record the cause of exception/interrupt/trap
-}
+pub use rcore_exception::TrapFrame;
 
 #[repr(C)]
 pub struct Context {
@@ -55,7 +43,7 @@ struct ContextContent {
 }
 
 extern "C" {
-    fn __trapret();
+    fn trap_return();
 }
 
 use core::mem::zeroed;
@@ -68,13 +56,13 @@ impl ContextContent {
         content.s[0] = arg;
         let mut _sstatus = sstatus::read();
         _sstatus.set_spp(sstatus::SPP::Supervisor); // 代表 sret 之后的特权级仍为 Ｓ
-        content.s[1] = _sstatus.bits();
+        content.s[1] = unsafe { core::mem::transmute(_sstatus) };
         content
     }
 
     fn new_user_thread(entry : usize, ustack_top : usize, satp : usize) -> Self {
         ContextContent{
-            ra: __trapret as usize,
+            ra: trap_return as usize,
             satp,
             s: [0;12],
             tf: {
