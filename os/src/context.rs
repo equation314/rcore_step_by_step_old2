@@ -61,20 +61,11 @@ impl ContextContent {
     }
 
     fn new_user_thread(entry : usize, ustack_top : usize, satp : usize) -> Self {
-        ContextContent{
+        ContextContent {
             ra: trap_return as usize,
             satp,
-            s: [0;12],
-            tf: {
-                let mut tf: TrapFrame = unsafe { zeroed() };
-                tf.x[2] = ustack_top;   // 栈顶 sp
-                tf.sepc = entry;   // sepc 在调用 sret 之后将被被赋值给 PC
-                tf.sstatus = sstatus::read();
-                tf.sstatus.set_spie(true);
-                tf.sstatus.set_sie(false);
-                tf.sstatus.set_spp(sstatus::SPP::User);   // 代表 sret 之后的特权级为U
-                tf
-            },
+            s: [0; 12],
+            tf: TrapFrame::new(entry, 0, ustack_top).status(sstatus::read()).user().enable_ints(),
         }
     }
 
